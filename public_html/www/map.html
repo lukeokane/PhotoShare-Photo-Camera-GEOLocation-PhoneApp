@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>Route Finder Demo</title>
+        <style>
+
+            #mapDiv
+            {
+                height:500px;
+                border:thin solid #CCC;
+            }
+
+            #directions
+            {
+                    float:left;
+
+                width:100%;
+                margin:0px;
+            }
+
+            #buttons
+            {
+                top: 50px;
+                position: fixed;
+                margin:5px;
+            }
+
+            #alertbox
+            {
+                 z-index: 1002;
+                top: 20%;
+                position: fixed;
+                width: 90%;
+                margin-left: 5%;
+                margin-right: 5%;
+
+            }
+
+            b
+            {
+                color: #0074D9;
+            }
+
+            summary
+            {
+                color: #0074D9;
+                 font-weight: bold;
+            }
+
+            .adp-summary
+            {
+                 color: #0074D9;
+                 font-style:italic;
+            }
+
+            .adp-text, .adp-marker
+            {
+                background-color: #0074D9;
+                 color: white;
+            }
+
+        </style>
+          <link rel="stylesheet" href="css/bootstrap.css">
+           <script src="js/jquery-3.2.0.min.js"></script>
+           <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+               <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+           <!-- Google Maps -->
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD3GNUNqilg3CdYIedKxEY5zgCl4p7xp-4"></script>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <script>
+
+            var currentLocationMap;
+            var directionsDisplay;
+            var directionsService;
+            var currentLocationMap;
+            var longitude;
+            var latitude;
+            function init()
+                {
+
+                    longitude = sessionStorage.getItem('longitude');
+                    latitude = sessionStorage.getItem('latitude');
+                    directionsService = new google.maps.DirectionsService();
+                    // route planner
+                    directionsDisplay = new google.maps.DirectionsRenderer();
+                    var currentLocationMap = new google.maps.LatLng(54, -6.3);  // DkIT
+
+                    var mapOptions = {zoom: 10, center: currentLocationMap};
+                    currentLocationMap = new google.maps.Map(document.getElementById('mapDiv'), mapOptions);
+                    directionsDisplay.setMap(currentLocationMap);
+
+                    // add directions to the route
+                    directionsDisplay.setPanel(document.getElementById('directions'));
+
+                    calculateRoute();
+                }
+
+            var travelMode = "DRIVING";
+            function calculateRoute()
+                {
+                    navigator.geolocation.getCurrentPosition(function (GEOObject)
+                        {
+                            curLatitude = GEOObject.coords.latitude;
+                            curLongitude = GEOObject.coords.longitude;
+                            var request = {origin: curLatitude + "," + curLongitude,
+                                destination: latitude + "," + longitude,
+                                travelMode: google.maps.TravelMode[travelMode]};
+
+                            directionsService.route(request, function (response, status)
+                                {
+                                    if (status == google.maps.DirectionsStatus.OK)
+                                        {
+                                            directionsDisplay.setDirections(response);
+                                            // add directions to the route
+
+                                        }
+                                        else if (status == google.maps.DirectionsStatus.ZERO_RESULTS)
+                                        {
+                                            $('#alertbox').fadeIn();
+                            $('#alertbox').removeClass();
+                            $('#alertbox').empty();
+                            $('#alertbox').addClass("alert alert-warning text-center ");
+                            $('#alertbox').append("<strong>Google</strong> returns no results.");
+                            $('#alertbox').delay(5000).fadeOut();
+                                        }
+
+                                }, function (error)
+                                {
+                               $('#alertbox').removeClass();
+                            $('#alertbox').empty();
+                            $('#alertbox').addClass("alert alert-danger text-center ");
+                            $('#alertbox').append("<strong>ERROR:</strong> returns no results.");
+                            $('#alertbox').delay(5000).fadeOut();
+                                });
+                        });
+
+
+                }
+
+
+                   function travelModeChange()
+                        {
+                               $('#alertbox').fadeIn();
+                            $('#alertbox').removeClass();
+                            $('#alertbox').empty();
+                            $('#alertbox').addClass("alert alert-success text-center ");
+                            $('#alertbox').append("<strong>Google:</strong> travel mode changed to " + travelMode);
+                            $('#alertbox').delay(5000).fadeOut();
+                        }
+        </script>
+    </head>
+
+    <body onload='init()'>
+        <div id='alertbox'></div>
+        <div id="mapDiv"></div>
+
+
+        <div id="controlPanel">
+            <div id='buttons'>
+                <button class="btn btn-primary"><i class="material-icons" onclick="travelMode = 'DRIVING';calculateRoute(); travelModeChange();">directions_car</i></button>
+                <button class="btn btn-primary"><i class="material-icons" onclick="travelMode = 'TRANSIT';calculateRoute(); travelModeChange()">directions_bus</i></button>
+                <button class="btn btn-primary"><i class="material-icons" onclick="travelMode = 'BICYCLING';calculateRoute(); travelModeChange()">directions_bike</i></button>
+                <button class="btn btn-primary"><i class="material-icons" onclick="travelMode = 'WALKING'; ;calculateRoute();  travelModeChange()">directions_walk</i></button>
+                <br>
+                <button style="margin-top: 1%;"class="btn btn-primary"><i class="material-icons" onclick="window.history.back()">exit_to_app</i></button>
+            </div>
+
+            <details><summary>Directions</summary>
+                <div id="directions"></div>
+            </details>
+        </div>
+
+
+    </body>
+</html>

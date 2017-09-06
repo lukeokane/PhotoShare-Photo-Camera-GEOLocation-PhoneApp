@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>1 Col Portfolio - Start Bootstrap Template</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="css/bootstrap.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="css/1-col-portfolio.css" rel="stylesheet">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+        <script type="text/javascript">
+
+            var deviceType;  // Is this an Apple or Android
+
+            var pictureSource;   // picture source
+            var destinationType; // sets the format of returned value
+            var username = localStorage.getItem('username');
+            var albumID = localStorage.getItem('albumID');
+            window.onload = onAllAssetsLoaded;
+            document.write("<div id='loadingMessage'>Loading...</div>");
+            function onAllAssetsLoaded()
+                {
+                    // Wait for Cordova to connect with the device
+                    document.addEventListener("deviceready", onDeviceReady, false);
+                }
+
+
+            // Cordova is ready to be used!
+            function onDeviceReady()
+                {
+                    // hide the webpage loading message
+                    document.getElementById('loadingMessage').style.visibility = "hidden";
+
+                    // get the device type
+                    deviceType = (navigator.userAgent.match(/iPad/i)) == "iPad" ? "iPad" : (navigator.userAgent.match(/iPhone/i)) == "iPhone" ? "iPhone" : (navigator.userAgent.match(/Android/i)) == "Android" ? "Android" : (navigator.userAgent.match(/BlackBerry/i)) == "BlackBerry" ? "BlackBerry" : "null";
+
+                    // get camera image types
+                    pictureSource = navigator.camera.PictureSourceType;
+                    destinationType = navigator.camera.DestinationType;
+
+                    window.plugins.insomnia.keepAwake();
+                }
+
+
+// Out-dated plugin, will leave here to show independence learning
+//            function locationOn()
+//                {
+//                    var locationOn = true;
+//                    cordova.plugins.diagnostic.isLocationEnabled(function (available)
+//                        {
+//                            available ? locationOn = true : locationOn = false;
+//                        }, function ()
+//                        {
+//                        });
+//
+//                    return locationOn;
+//                }
+
+            function internetAccess()
+                {
+                    var internetAccess = false;
+                    if (navigator.connection.type === "none")
+                        {
+                            internetAccess = false;
+                        } else
+                        {
+                            internetAccess = true;
+                        }
+
+                    return internetAccess;
+                }
+            // Take picture using device camera and retrieve image as base64-encoded string
+            function takePhoto()
+                {
+                    if (checkStatus() === true)
+                        {
+                            navigator.camera.getPicture(onPhotoDataSuccess, onFail, {quality: 50, destinationType: destinationType.DATA_URL, correctOrientation: true});
+                        }
+                }
+
+            function checkStatus()
+                {
+//                    var loc = false;
+
+                    //Plugin is out-dated
+//                    if (locationOn() === true)
+//                        {
+//                            loc = true;
+//                        } else
+//                        {
+//                            $('#response').fadeIn();
+//                            $('#response').removeClass();
+//                            $('#response').empty();
+//                            $('#response').addClass("alert alert-danger text-center ");
+//                            $('#response').append("<strong>Failure!</strong> GPS services must be turned on.");
+//                            $('#response').delay(5000).fadeOut();
+//                        }
+
+                    if (internetAccess() === true)
+                        {
+                            return true;
+                        } else
+                        {
+                            $('#response').fadeIn();
+                            $('#response').removeClass();
+                            $('#response').empty();
+                            $('#response').addClass("alert alert-danger text-center ");
+                            $('#response').append("<strong>Failure!</strong> No internet connection.");
+                            $('#response').delay(5000).fadeOut();
+                            return false;
+                        }
+
+                }
+
+            var imageName;
+            var uploadByCamera;
+            // Called when a photo is successfully retrieved
+            function onPhotoDataSuccess(imageData)
+                {
+                    //  capturedPhoto.src = "data:image/jpeg;base64," + imageData;
+                    navigator.geolocation.getCurrentPosition(function ()
+                        {
+                            var data = new FormData();
+                            data.append('image', imageData);
+                            data.append('username', username);
+                            data.append('albumID', albumID);
+                            uploadByCamera = $.ajax({
+                                url: 'http://www.lukeokane.com/upload_camera_image.php',
+                                type: "POST",
+                                processData: false,
+                                data: data,
+                                contentType: false,
+                                success: function (data)
+                                    {
+                                        var dataJSON = jQuery.parseJSON(data);
+                                        if (dataJSON.result === "success")
+                                            {
+                                                imageName = dataJSON.reply;
+                                                navigator.geolocation.getCurrentPosition(onGeolocationSuccess, onGeolocationError);
+
+                                            } else
+                                            {
+                                                $('#response').fadeIn();
+                                                $('#response').removeClass();
+                                                $('#response').empty();
+                                                $('#response').addClass("alert alert-danger text-center ");
+                                                $('#response').append("<strong>Failure!</strong> Image did not upload.");
+                                                $('#response').delay(5000).fadeOut();
+                                                $("#uploadgallerybutton, #uploadcamerabutton").removeClass();
+                                                $("#loadinggif").addClass("hidden");
+                                                $("#uploadgallerybutton, #uploadcamerabutton").addClass("btn btn-primary btn-block");
+                                            }
+                                    },
+                                error: function (data)
+                                    {
+                                        $('#response').fadeIn();
+                                        $('#response').removeClass();
+                                        $('#response').empty();
+                                        $('#response').addClass("alert alert-danger text-center ");
+                                        $('#response').append("<strong>Failure!</strong> An error occurred connecting to the server.");
+                                        $('#response').delay(5000).fadeOut();
+                                        $("#uploadgallerybutton, #uploadcamerabutton").removeClass();
+                                        $("#loadinggif").addClass("hidden");
+                                        $("#uploadgallerybutton, #uploadcamerabutton").addClass("btn btn-primary btn-block");
+                                    }
+                            });
+                            $("#loadinggif").removeClass();
+                            $("#uploadgallerybutton, #uploadcamerabutton").removeClass();
+                            $("#uploadgallerybutton, #uploadcamerabutton").addClass("btn btn-primary btn-block disabled");
+
+                        }, function ()
+                        {
+                            $('#response').fadeIn();
+                            $('#response').removeClass();
+                            $('#response').empty();
+                            $('#response').addClass("alert alert-danger text-center ");
+                            $('#response').append("<strong>Failure!</strong> GPS is either disabled or has little connection.");
+                            $('#response').delay(5000).fadeOut();
+                        });
+
+                }
+
+            function onGeolocationSuccess(GEOObject)
+                {
+                    var data = new FormData();
+                    var longitude = GEOObject.coords.longitude;
+                    var latitude = GEOObject.coords.latitude;
+                    data.append('imageFileName', imageName);
+                    data.append('GEOLat', latitude);
+                    data.append('GEOLong', longitude);
+
+                   $.ajax({
+                        url: 'http://www.lukeokane.com/upload_images_coords.php',
+                        type: "POST",
+                        processData: false,
+                        data: data,
+                        async: false,
+                        contentType: false,
+                        success: function (data)
+                            {
+                                $('#response').fadeIn();
+                                $('#response').removeClass();
+                                $('#response').empty();
+                                $('#response').addClass("alert alert-success text-center ");
+                                $('#response').append("<strong>Success!</strong> Image uploaded successfully");
+                                $('#response').delay(5000).fadeOut();
+                                $("#loadinggif").addClass("hidden");
+                                $("#uploadgallerybutton, #uploadcamerabutton").removeClass();
+                                $("#loadinggif").addClass("hidden");
+                                $("#uploadgallerybutton, #uploadcamerabutton").addClass("btn btn-primary btn-block");
+                            },
+                        error: function (data)
+                            {
+                                $('#response').fadeIn();
+                                $('#response').removeClass();
+                                $('#response').empty();
+                                $('#response').addClass("alert alert-danger text-center ");
+                                $('#response').append("<strong>Failure!</strong> An error occurred while uploading.");
+                                $('#response').delay(5000).fadeOut();
+                                $("#uploadgallerybutton, #uploadcamerabutton").removeClass();
+                                $("#loadinggif").addClass("hidden");
+                                $("#uploadgallerybutton, #uploadcamerabutton").addClass("btn btn-primary btn-block");
+                            }
+                    });
+                }
+
+            function onGeolocationError(error)
+                {
+                    $('#response').fadeIn();
+                    $('#response').removeClass();
+                    $('#response').empty();
+                    $('#response').addClass("alert alert-danger text-center ");
+                    $('#response').append("<strong>Failure!</strong> GPS is either disabled or has little connection.");
+                    $('#response').delay(5000).fadeOut();
+                    $("#uploadgallerybutton, #uploadcamerabutton").removeClass();
+                    $("#loadinggif").addClass("hidden");
+                    $("#uploadgallerybutton, #uploadcamerabutton").addClass("btn btn-primary btn-block");
+                }
+
+
+            // Called when a photo is not retrieved
+            function onFail(message)
+                {
+                    $('#response').fadeIn();
+                    $('#response').removeClass();
+                    $('#response').empty();
+                    $('#response').addClass("alert alert-warning text-center ");
+                    $('#response').append("<strong>Failure!</strong> An error occurred with the camera or cancelled");
+                    $('#response').delay(5000).fadeOut();
+                    $("#uploadgallerybutton, #uploadcamerabutton").removeClass();
+                    $("#loadinggif").addClass("hidden");
+                    $("#uploadgallerybutton, #uploadcamerabutton").addClass("btn btn-primary btn-block");
+
+                }
+
+            function cancelCameraUpload()
+                {
+
+                    if (uploadByCamera.state() === 'pending')
+                        {
+                            uploadByCamera.abort();
+                            $('#response').fadeIn();
+                            $('#response').removeClass();
+                            $('#response').empty();
+                            $('#response').addClass("alert alert-success text-center ");
+                            $('#response').append("<strong>Upload Cancelled</strong>");
+                            $('#response').delay(5000).fadeOut();
+                        } else
+                        {
+                            $('#response').fadeIn();
+                            $('#response').removeClass();
+                            $('#response').empty();
+                            $('#response').addClass("alert alert-warning text-center ");
+                            $('#response').append("<strong>No images are currently uploading.</strong>");
+                            $('#response').delay(5000).fadeOut();
+                        }
+                }
+        </script>
+
+        <style>
+            #loadinggif {
+                z-index: 1000;
+                top: 10%;
+                left: 40%;
+                height: 20%;
+                width: 20%;
+                position: fixed;
+            }
+
+            #response {
+                z-index: 1000;
+                top: 10%;
+                position: fixed;
+                width: 90%;
+                margin-left: 5%;
+                margin-right: 5%;
+            }
+        </style>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">PhotoShare</a>
+                </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="index.html">Back</a>
+                        </li>
+                        <li>
+                            <a onclick="window.history.back()">Back to Album</a>
+                        </li>
+                        <li>
+                            <a href="#">Contact</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container -->
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container">
+
+            <!-- Page Heading -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 style="color:#0074D9;" class="page-header">Picture Share
+                    </h1>
+
+                </div>
+            </div>
+            <!-- /.row -->
+
+            <!-- Project One -->
+            <div class="row">
+                <div class="col-md-7">
+                    <img class="img-responsive" src="http://www.lukeokane.com/images/uploadthumbnail2.jpg" alt="">
+                </div>
+                <div class="col-md-5">
+                    <h4>Take a picture with your camera</h4>
+                    <p>(<b>NOTE</b>: You will need to have your device's GPS location enabled!)</p>
+                    <a id="uploadcamerabutton" onclick="takePhoto()" class="btn btn-primary btn-block">Use Camera <span class="glyphicon glyphicon-chevron-right"></span></a>
+                    <br>
+                    <a id="cancelcamerauploadbutton" onclick="cancelCameraUpload()" class="btn btn-primary btn-block">Cancel Uploading<span class="glyphicon glyphicon-chevron-right"></span></a>
+                </div>
+            </div>
+            <!-- /.row -->
+
+            <hr>
+
+            <!-- Project Two -->
+            <div class="row">
+                <div class="col-md-7">
+                    <img class="img-responsive" src="http://www.lukeokane.com/images/uploadthumbnail1.png" alt="">
+                </div>
+                <div class="col-md-5">
+                    <h4>Upload Images from Gallery</h4>
+                    <p>(<b>NOTE</b>: Your images will need to have GPS location included in them!)</p>
+                    <form id="upload_file">
+                        <a id="uploadgallerybutton" class="btn btn-primary btn-block">Upload from Gallery<span class="glyphicon glyphicon-chevron-right"></span></a>
+                        <input style="visibility: hidden;" id='file' multiple type="file" name="upload[]">
+                    </form>
+                    <a id="cancelgalleryuploadbutton" class="btn btn-primary btn-block">Cancel Uploading<span class="glyphicon glyphicon-chevron-right"></span></a>
+                </div>
+            </div>
+            <!-- /.row -->
+            <hr>
+
+        </div>
+        <!-- /.container -->
+
+        <div id="loadinggif" class="hidden" ><img class="img-responsive" src="http://www.lukeokane.com/images/loading.gif" alt=""></div>
+        <div id="response" >
+
+        </div>
+
+        <!-- jQuery -->
+        <script src="js/jquery-3.2.0.min.js"></script>
+        <script src="js/upload_image.js"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="js/bootstrap.min.js"></script>
+
+    </body>
+
+</html>

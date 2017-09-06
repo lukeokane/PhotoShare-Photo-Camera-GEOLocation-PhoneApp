@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>OpenFB Sample</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <link rel="stylesheet" href="ratchet.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        /*#links {
+            top: 300px;
+            position: fixed;
+        }*/
+
+        #userInfo {
+            text-align: center;
+            margin: auto;
+        }
+
+        #userName,
+        #userImageWrapper {
+            border-radius: 60px;
+        }
+
+        #logo {
+            width: 60%;
+            margin: auto;
+            text-align: center;
+        }
+
+        #logo>h2 {
+            color: #3B5998;
+        }
+
+        .photo {
+            color: #46C123;
+        }
+
+        #loginbtn {
+            margin: auto;
+            background-color: #3B5998;
+            color: white;
+        }
+
+        #links {
+            width: 100%;
+            text-align: center;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        #nologin {
+            margin: auto;
+            text-align: center;
+            color: #46C123;
+            text-decoration: underline;
+            text-shadow: 2px 2px 2px 2px;
+        }
+
+        #logoutbtn {
+            color: #E22727;
+        }
+
+        .nologin {
+            width: 100%;
+            text-align: center;
+        }
+
+        #cookiespolicy {
+            width: 100%;
+            color: white;
+            opacity: 0.9;
+        }
+
+        #imageBG {
+            background-color: black;
+        }
+
+        #content {
+            margin: auto;
+            text-align: center;
+            background-color: black;
+        }
+
+        #userInfo {
+            background-color: black;
+            width: 100%;
+            height: 40px;
+        }
+
+        #userInfo>p {
+            display: inline-block;
+            float: left;
+            font-size: 30px;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+        #userImageWrapper {
+            height: 40px;
+            width: 40px;
+            float: left;
+        }
+
+        #userImageWrapper>img {
+            height: 38px;
+            width: 38px;
+        }
+
+        #userAlbum {
+            margin: auto;
+            color: #3B5998;
+        }
+
+        .insertAlbumSection {
+            margin: auto;
+            width: 45%;
+        }
+
+        #insertAlbumSectionButton {
+            float: right;
+            width: 30%;
+            color: red;
+        }
+
+        #insertAlbumSectionInput {
+            float: left;
+            width: 70%;
+            height: 50px;
+        }
+        #adminbtn {
+          color: red;
+        }
+        #swall {
+          color: #46C123;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div id="content" class="content content-padded">
+        <br>
+        <div id="userInfo">
+
+            <div id="userImageWrapper">
+                <img id="userPic">
+            </div>
+            <p><span id="userName"></span></p>
+
+        </div>
+
+
+        <div id="logo">
+            <br><br>
+            <img src="images/logo.svg" alt="Logo">
+            <h2><span class="photo">Photo</span>Share</h2>
+        </div><br><br>
+        <button id="loginbtn" class="btn btn-block" onclick="login()">Login with Facebook</button>
+
+        <div class="nologin">
+            <a href="displayall.html">
+                <p id="nologin">or take a sneak peak without login!</p>
+            </a>
+        </div>
+
+        <!-- <a href="display_album.html"><button id="links" class="btn btn-block">MY ALBUM</button></a> -->
+
+        <div id="displayUserAlbums">
+          <input id="insertAlbumSectionInput" class="btn btn-block insertAlbumSection" type="text" placeholder="New Album"><button id="insertAlbumSectionButton" class="btn insertAlbumSection btn-block" onclick="insertNewAlbum()">Create</button>
+        </div>
+        <button id="swall" class="btn btn-block" onclick="showAllToLoggedInUser()">Timeline</button>
+        <button id="adminbtn" class="btn btn-block" onclick="adminmode()">Admin Mode</button>
+        <button id="logoutbtn" class="btn btn-block" onclick="logout()">Logout</button>
+        <!-- <button id="" class="btn btn-block" onclick="getUserAlbums()">getUserAlbums</button> -->
+
+        <br>
+
+        <div id="cookiespolicy">
+            <p>PhotoShare uses cookies. Some cookies may have been set already. To find out more about our use of cookies you can visit our privacy and cookies statement. By using our application, you agree to our use of cookies. We wont post or message
+                you, all information will be used for login or sharing purposes. Thank you for using PhotoShare!</p>
+        </div>
+
+        <br><br><br><br><br><br><br><br><br><br><br>
+    </div>
+
+
+
+
+    <!-- <button class="btn btn-block" onclick="getInfo()">Get My Info</button>
+
+        <hr/> -->
+    <!-- <button class="btn btn-block" onclick="insertUserToDb()">Insert to DB</button> -->
+
+
+    <!-- <textarea id="Message" placeholder="What's on your mind?" rows="5"></textarea> -->
+    <!-- <button class="btn btn-block" onclick="share()">Share</button>
+        <hr/> -->
+    <!--
+        <p>Complete Facebook Logout. After logging out, you'll have to login again and provide your Facebook credentials.</p>
+        <button class="btn btn-block" onclick="logout()">Logout</button>
+        <hr/>
+
+        <button class="btn btn-block" onclick="readPermissions()">Read Permissions</button>
+
+        <p>Revoke App Permissions. After revoking permissions, you'll have to grant permissions again when logging in.</p>
+        <button class="btn btn-block" onclick="revoke()">Revoke Permissions</button> -->
+
+    <script>
+        document.addEventListener("deviceready", onDeviceReady, false);
+
+        function onDeviceReady() {
+
+            // sessionStorage.setItem('usernameOfAlbumOwner', "Patryk Malina");
+            // sessionStorage.setItem('albumID', 3);
+            // sessionStorage.setItem('usernameOfAlbumOwner', "Luke");
+            // sessionStorage.setItem('albumID', 1);
+            // localStorage.setItem('username', 'Luke');
+            if (!localStorage.getItem('username')) {
+                document.getElementById('logo').style.display = 'block';
+                document.getElementById('loginbtn').style.display = 'block';
+                document.getElementById('nologin').style.display = 'inline';
+                document.getElementById('logoutbtn').style.display = 'none';
+                document.getElementById('displayUserAlbums').style.display = 'none';
+                document.getElementById('swall').style.display = 'none';
+                document.getElementById('cookiespolicy').style.display = 'block';
+                document.getElementById('adminbtn').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'none';
+                document.getElementById('content').style.backgroundColor = 'black';
+
+            } else {
+                document.getElementById('logo').style.display = 'none';
+                document.getElementById('loginbtn').style.display = 'none';
+                document.getElementById('nologin').style.display = 'none';
+                document.getElementById('logoutbtn').style.display = 'block';
+                document.getElementById('displayUserAlbums').style.display = 'block';
+                document.getElementById('swall').style.display = 'block';
+                document.getElementById('cookiespolicy').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'block';
+
+                document.getElementById('content').style.backgroundColor = 'white';
+
+                document.getElementById("userName").innerHTML = localStorage.getItem('username');
+                document.getElementById("userPic").src = localStorage.getItem('profilepic');
+
+                getUserAlbums();
+            }
+        }
+    </script>
+    <!--cordova.js is automatically injected by the Cordova build process-->
+    <script src="cordova.js"></script>
+
+    <script src="openfb.js"></script>
+
+    <script>
+        function adminmode() {
+            window.location.replace("admin.html");
+        }
+        // Defaults to sessionStorage for storing the Facebook token
+        openFB.init({
+            appId: '421572331509468'
+        });
+        //  Uncomment the line below to store the Facebook token in localStorage instead of sessionStorage
+        //  openFB.init({appId: 'YOUR_FB_APP_ID', tokenStore: window.localStorage});
+        function login() {
+            openFB.login(
+                function(response) {
+                    if (response.status === 'connected') {
+                        getInfo();
+                    } else {
+                        alert('Facebook login failed: ' + response.error);
+                    }
+                }, {
+                    scope: 'email,publish_actions'
+                });
+
+        }
+
+        function updateButtons() {
+            if (!localStorage.getItem('username')) {
+                document.getElementById('logo').style.display = 'block';
+                document.getElementById('loginbtn').style.display = 'block';
+                document.getElementById('nologin').style.display = 'inline';
+                document.getElementById('logoutbtn').style.display = 'none';
+                document.getElementById('displayUserAlbums').style.display = 'none';
+                document.getElementById('swall').style.display = 'none';
+                document.getElementById('cookiespolicy').style.display = 'block';
+                document.getElementById('adminbtn').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'none';
+
+                document.getElementById('content').style.backgroundColor = 'black';
+            } else {
+                document.getElementById('logo').style.display = 'none';
+                document.getElementById('loginbtn').style.display = 'none';
+                document.getElementById('nologin').style.display = 'none';
+                document.getElementById('logoutbtn').style.display = 'block';
+                document.getElementById('displayUserAlbums').style.display = 'block';
+                document.getElementById('swall').style.display = 'block';
+                document.getElementById('cookiespolicy').style.display = 'none';
+
+                document.getElementById('userInfo').style.display = 'block';
+                document.getElementById('content').style.backgroundColor = 'white';
+            }
+            insertUserToDb();
+        }
+
+        function getUserAlbums() {
+            var userID = localStorage.getItem('userid');
+            // alert(userID);
+            var data = new FormData();
+            data.append('userid', userID);
+
+            $.ajax({
+                url: 'http://www.lukeokane.com/get_user_albums.php',
+                type: "POST",
+                processData: false,
+                data: data,
+                async: false,
+                contentType: false,
+                success: function(data) {
+                    var abc = JSON.parse(data);
+                    // alert(abc);
+                    var html = '<input id="insertAlbumSectionInput" class="btn btn-block insertAlbumSection" type="text" placeholder="New Album"><button id="insertAlbumSectionButton" class="btn insertAlbumSection btn-block" onclick="insertNewAlbum()">Create</button>';
+
+                    for (var i = 0; i < data.length; i++) {
+                        html += '<button id="userAlbum" value="' + abc[i].albumID + '" class="btn btn-block" onclick="setAlbumId(this.value)">' + abc[i].albumName + '</button><br>';
+                        $('#displayUserAlbums').html(html);
+                    }
+
+                },
+                error: function(data) {
+                    alert('ERRO');
+                }
+            });
+        }
+
+        function getInfo() {
+            openFB.api({
+                path: '/me',
+                success: function(data) {
+                    localStorage.setItem('username', data.name);
+                    localStorage.setItem('usernameOfAlbumOwner', data.name);
+                    localStorage.setItem('profilepic', 'http://graph.facebook.com/' + data.id + '/picture?type=small');
+
+                    document.getElementById("userName").innerHTML = localStorage.getItem('username');
+                    document.getElementById("userPic").src = localStorage.getItem('profilepic');
+                    // document.getElementById("userPic").src = 'http://graph.facebook.com/' + data.id + '/picture?type=small';
+                    updateButtons();
+                },
+                error: errorHandler
+            });
+        }
+
+        function setAlbumId(value) {
+            var albumNewID = value;
+            // alert("album new id is - "+albumNewID);
+            localStorage.setItem('albumID', albumNewID);
+            window.location.href = "display_album_edit_perms.html";
+        }
+
+        function showAllToLoggedInUser() {
+          window.location.href = "displayall.html";
+        }
+
+        function insertNewAlbum() {
+            var userID = localStorage.getItem('userid');
+            var newAlbumName = document.getElementById('insertAlbumSectionInput').value;
+
+            var data = new FormData();
+            data.append('userID', userID);
+            data.append('newAlbumName', newAlbumName);
+
+            $.ajax({
+                url: 'http://www.lukeokane.com/insert_new_album.php',
+                type: "POST",
+                processData: false,
+                data: data,
+                async: false,
+                contentType: false,
+                success: function(data) {
+                    alert('Album Created!')
+                },
+                error: function(data) {
+                    alert('Sorry, there was a problem');
+                }
+            });
+            window.location.href = "index.html";
+        }
+
+
+
+        function insertUserToDb() {
+            var username = localStorage.getItem('username');
+            var userimage = localStorage.getItem('profilepic');
+            var data = new FormData();
+            data.append('username', username);
+            data.append('userimage', userimage);
+
+            $.ajax({
+                url: 'http://www.lukeokane.com/insertUser.php',
+                type: "POST",
+                processData: false,
+                data: data,
+                async: false,
+                contentType: false,
+                success: function(data) {
+                    var abc = JSON.parse(data);
+                    localStorage.setItem('userid', abc.userID);
+                    getUserAlbums();
+                    if (abc.u_permission == 1337) {
+                        document.getElementById('adminbtn').style.display = 'block';
+                    } else {
+                        document.getElementById('adminbtn').style.display = 'none';
+                    }
+                },
+                error: function(data) {
+                    alert('ERRO');
+                }
+            });
+
+        }
+
+
+        function share() {
+            openFB.api({
+                method: 'POST',
+                path: '/me/feed',
+                params: {
+                    message: "My Image",
+                    link: href = "http://www.lukeokane.com/images/1.JPG"
+                },
+                success: function() {
+                    alert('the item was posted on Facebook');
+                },
+                error: errorHandler
+            });
+        }
+
+        function readPermissions() {
+            openFB.api({
+                method: 'GET',
+                path: '/me/permissions',
+                success: function(result) {
+                    alert(JSON.stringify(result.data));
+                },
+                error: errorHandler
+            });
+        }
+
+        function revoke() {
+            openFB.revokePermissions(
+                function() {
+                    alert('Permissions revoked');
+                },
+                errorHandler);
+        }
+
+        function logout() {
+            localStorage.clear();
+            openFB.logout(
+                function() {
+                    alert('Logout successful');
+                    updateButtons();
+                    window.location = "index.html";
+                },
+                errorHandler);
+        }
+
+        function errorHandler(error) {
+            alert(error.message);
+        }
+    </script>
+    <script src="js/jquery-3.2.0.min.js"></script>
+</body>
+
+</html>

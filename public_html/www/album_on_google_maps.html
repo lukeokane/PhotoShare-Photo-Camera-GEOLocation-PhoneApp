@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <link href="css/bootstrap.css" rel="stylesheet">
+
+        <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD3GNUNqilg3CdYIedKxEY5zgCl4p7xp-4"></script>
+        <script type="text/javascript" src="js/infobox.js"></script>
+        <script type="text/javascript" src="js/jquery-3.2.0.min.js"></script>
+
+        <style>
+
+            body, html {
+                height: 100%;
+                width: 100%;
+            }
+            #map_canvas
+            {
+                top: 0%;
+                left: 0%;
+                margin: 0px;
+                height: 100%;
+                width: 100%;
+                z-index:0;
+            }
+
+            #returnButton
+            {
+                top: 8%;
+               left: 2%;
+                z-index: 1000;
+                position:fixed;
+            }
+
+             #response {
+                z-index: 1000;
+                top: 10%;
+                position: fixed;
+                width: 90%;
+                margin-left: 5%;
+                margin-right: 5%;
+                z-index: 2000;
+            }
+        </style>
+        <script type="text/javascript">
+
+
+
+            function initialize()
+                {
+                    var username = localStorage.getItem('usernameOfAlbumOwner');
+                    var albumID = localStorage.getItem('albumID');
+
+                    var data = {
+                        usernameOfAlbumOwner: username,
+                        albumID: albumID
+                    };
+                    var bounds = new google.maps.LatLngBounds();
+
+                    var secheltLoc = new google.maps.LatLng(53.98501268978016, -6.394059585260432);
+                    var myMapOptions = {
+                        zoom: 15
+                        , center: secheltLoc
+                        , mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+                    var theMap = new google.maps.Map(document.getElementById("map_canvas"), myMapOptions);
+
+                    var imageLocations = [];
+
+
+                    $.ajax({
+                        url: 'http://www.lukeokane.com/get_album_images.php',
+                        type: "POST",
+                        dataType: 'json',
+                        data: data,
+                        async: false,
+                        success: function (locations)
+                            {
+                                $.each(locations, function (i, location)
+                                    {
+                                        imageLocations.push([location.GEOAddress, location.GEOLat, location.GEOLong, location.imageFileName, location.imageDesc, location.dateTaken]);
+                                    });
+                            },
+                        error: function (data)
+                            {
+                                  $('#response').fadeIn();
+                            $('#response').removeClass();
+                            $('#response').empty();
+                            $('#response').addClass("alert alert-danger text-center ");
+                            $('#response').append("<strong>Failure!</strong> No internet connection.");
+                            $('#response').delay(5000).fadeOut();
+                            }
+
+                    });
+
+
+
+
+                    var marker, markers = [], i;
+
+                    var ib = new InfoBox({
+                        content: ""
+                        , disableAutoPan: false
+                        , maxWidth: 0
+                        , pixelOffset: new google.maps.Size(-140, 0)
+                        , zIndex: null
+                        , boxStyle: {
+                            background: "url('tipbox.gif') no-repeat"
+                            , opacity: 1
+                            , width: "300px"
+                        }
+                        , closeBoxMargin: "10px 2px 2px 2px"
+                        , closeBoxURL: "https://www.google.com/intl/en_us/mapfiles/close.gif"
+                        , infoBoxClearance: new google.maps.Size(1, 1)
+                        , isHidden: false
+                        , pane: "floatPane"
+                        , enableEventPropagation: false
+                    });
+
+                    for (i = 0; i < imageLocations.length; i++)
+                        {
+
+                            var boxText = document.createElement("div");
+                            var myImage = document.createElement("div");
+                            var myText = document.createElement("div");
+                            boxText.style.cssText = "left:0px;border: 1px solid white; color: white;margin-top: 8px; background-color: rgba(0, 116, 217, 0.3); padding: 5px; box-shadow: 5px 5px 5px black; float: right;";
+                            boxText.innerHTML = '<div id="myImage"</div>';
+                            boxText.appendChild(myImage);
+                            boxText.appendChild(myText);
+                            myText.style.cssText = 'height: 100%; width: 100%; padding: 2px;';
+                            myText.innerHTML = '<div id="myText"><h4>' + imageLocations[i][0] + ' </h4><b>Date:</b> ' + imageLocations[i][5] + '<br><b>Description: </b>' + imageLocations[i][4] + ' <button type="button" class="btn btn-primary btn-block" onclick="gotoPic(' + imageLocations[i][1] + ',' + imageLocations[i][2] + ')">Travel There!</button></div>';
+                            myImage.style.cssText = 'margin: 5px; height: 100%; width: 60%; float: left;';
+                            myImage.innerHTML = '<div id="myImage"><img src="http://www.lukeokane.com/images/' + imageLocations[i][3] + '" alt="Mountain View" style="width:100%;"></div>';
+                            markers.push(boxText);
+                        }
+
+                    for (i = 0; i < imageLocations.length; i++)
+                        {
+
+                            marker = new google.maps.Marker({
+                                position: new google.maps.LatLng(imageLocations[i][1], imageLocations[i][2]),
+                                map: theMap,
+                                animation: google.maps.Animation.DROP
+                            });
+
+                            bounds.extend(marker.position);
+
+
+                            google.maps.event.addListener(marker, 'click', (function (marker, i)
+                                {
+                                    return function ()
+                                        {
+                                            ib.open(theMap, this);
+                                            ib.setContent(markers[i]);
+                                        }
+                                })(marker, i));
+                        }
+
+                    theMap.fitBounds(bounds);
+
+
+
+                }
+
+
+            function gotoPic(latitude, longitude)
+                {
+                    sessionStorage.setItem("latitude", latitude);
+                    sessionStorage.setItem("longitude", longitude);
+                    window.location.href = "map.html";
+                }
+        </script>
+        <title>Map</title>
+    </head>
+    <body onload="initialize()">
+        <div id="response"></div>
+        <a  id="returnButton" onclick="window.history.back();" class="edit btn btn-primary">Return to Album<span class="glyphicon glyphicon-chevron-right"></span></a>
+        <div id="map_canvas"></div>
+        <!-- Bootstrap Core JavaScript -->
+        <script src="js/bootstrap.js"></script>
+    </body>
+
+</html>

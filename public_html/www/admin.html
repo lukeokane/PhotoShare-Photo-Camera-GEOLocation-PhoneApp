@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>1 Col Portfolio - Start Bootstrap Template</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="css/bootstrap.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="css/1-col-portfolio.css" rel="stylesheet">
+
+        <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <style>
+            .img-responsive
+            {
+                width: 100%;
+                max-height:300px;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            }
+
+            b
+            {
+                color:#0074D9;
+            }
+
+            #response {
+                z-index: 1001;
+                top: 15%;
+                position: fixed;
+                width: 80%;
+                margin-left: 5%;
+                margin-right: 5%;
+            }
+
+            #li .edit {
+                display: none;
+            }
+
+            #li.edit .edit {
+                display: initial;
+            }
+
+            #li.edit .noedit {
+                display: none;
+            }
+
+            p{
+                text-align: justify;
+                text-justify: inter-word;
+            }
+
+            #searchUser
+            {
+                width: 50%;
+                left: 5%;
+            }
+
+            #searchUserImages
+            {
+                bottom: 8%;
+                left: 5%;
+                position:fixed;
+                z-index: 1000;
+                width: 90%;
+            }
+
+            #deleteUserButton, #searchUser
+            {
+                bottom: 1%;
+                right: 2%;
+                position:fixed;
+                z-index: 1000;
+            }
+        </style>
+
+        <script>
+            function goToPic(lat, long) {
+            navigator.geolocation.getCurrentPosition(function() {
+            sessionStorage.setItem('latitude', lat);
+            sessionStorage.setItem('longitude', long);
+            window.location.href = "map.html";
+            $(".container").fadeOut();
+            }, function(){
+            $('#response').fadeIn();
+            $('#response').removeClass();
+            $('#response').empty();
+            $('#response').addClass("alert alert-danger text-center ");
+            $('#response').append("<strong>Error!</strong> GPS is disabled or connection is weak.");
+            $('#response').delay(5000).fadeOut();
+            });
+            }
+        </script>
+    </head>
+
+    <body>
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+             <input type="text" placeholder="Find user images by username" class="form-control" id="searchUserImages">
+        <input type="text" class="form-control" id="searchUser"><a id="deleteUserButton"  class="edit btn btn-primary">Delete User<span class="glyphicon glyphicon-chevron-right"></span></a>
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">PhotoShare - Mobile Admin Panel</a>
+                </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="index.html">Back</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container -->
+        </nav>
+
+                    <!-- Project One -->
+            <template id="image_display_div_template">
+                <div class="row well well-lg">
+                    <div class="col-md-7">
+                        <img class="img-responsive" src="http://www.lukeokane.com/images/{{imageFileName}}" alt="">
+                    </div>
+                    <div class="col-md-5">
+                        <br>
+                        <p><b>Date Uploaded:</b> {{dateUploaded}}</p>
+                        <p><b>Date Taken:</b> {{dateTaken}}<p>
+                        <p><b>Location:</b> {{GEOAddress}}<p>
+                        <hr>
+                        <div id="li" data-imageid="{{imageID}}">
+                            <blockquote class="noedit blockquote">
+                                <p class="noedit description">{{imageDesc}}</p>
+                            </blockquote>
+                            <textarea style="resize: none;" maxlength="100" class="form-control edit description" rows="4" id="comment"></textarea>
+                            <hr>
+                            <a class="deleteImage noedit btn btn-primary">Delete Image<span class="glyphicon glyphicon-chevron-right"></span></a>
+                            <a class="editDescription noedit btn btn-primary" >Edit Description<span class="glyphicon glyphicon-chevron-right"></span></a>
+                            <a class="saveEdit edit btn btn-primary" >Save<span class="glyphicon glyphicon-chevron-right"></span></a>
+                            <a class="cancelEdit edit btn btn-primary" >Cancel Edit<span class="glyphicon glyphicon-chevron-right"></span></a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <hr>
+            </template>
+
+
+
+        <!-- Page Content -->
+        <div class="images container">
+            <!-- Page Heading -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 style="color:#0074D9" class="page-header">Admin
+
+                    </h1>
+                </div>
+            </div>
+            <!-- /.row -->
+            No searches yet...
+
+
+
+
+
+        </div>
+        <div id="response" ></div>
+        <!-- /.container -->
+
+        <!-- JS files -->
+        <script src="js/jquery-3.2.0.min.js"></script>
+        <script src="js/mustache.js"></script>
+        <script src="js/admin.js"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="js/bootstrap.js"></script>
+
+    </body>
+
+</html>
